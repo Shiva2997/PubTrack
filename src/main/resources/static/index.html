@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PubTrack · Manuscript Submission &amp; Peer Review</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f4e8c'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='19' font-weight='700' fill='white' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">
+        <span class="logo" aria-hidden="true">P</span>
+        <div>
+            <h1>PubTrack</h1>
+            <p>Manuscript submission &amp; peer review</p>
+        </div>
+    </div>
+    <label class="acting-as">
+        <span>Acting as</span>
+        <select id="user-select" aria-label="Acting user"></select>
+    </label>
+</header>
+
+<nav class="tabs" id="tabs">
+    <button data-view="manuscripts" class="active">Manuscripts</button>
+    <button data-view="submit" data-role="AUTHOR">Submit manuscript</button>
+    <button data-view="reviews" data-role="REVIEWER">My reviews</button>
+    <button data-view="dashboard" data-role="EDITOR">Dashboard</button>
+</nav>
+
+<main>
+    <!-- Manuscript list -->
+    <section id="view-manuscripts" class="view">
+        <form class="filters" id="filters">
+            <input type="search" id="filter-q" placeholder="Search title, keywords, abstract">
+            <select id="filter-status">
+                <option value="">All statuses</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="UNDER_REVIEW">Under review</option>
+                <option value="REVISION_REQUESTED">Revision requested</option>
+                <option value="ACCEPTED">Accepted</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="WITHDRAWN">Withdrawn</option>
+            </select>
+            <select id="filter-journal">
+                <option value="">All journals</option>
+            </select>
+            <button type="submit" class="btn">Search</button>
+        </form>
+        <div class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Journal</th>
+                    <th>Author</th>
+                    <th>Status</th>
+                    <th>Reviews</th>
+                    <th>Last update</th>
+                </tr>
+                </thead>
+                <tbody id="manuscript-rows"></tbody>
+            </table>
+            <div class="pager" id="pager"></div>
+        </div>
+    </section>
+
+    <!-- Submit -->
+    <section id="view-submit" class="view hidden">
+        <div class="card narrow">
+            <h2>Submit a manuscript</h2>
+            <form id="submit-form" class="form">
+                <label>Journal
+                    <select name="journalId" id="submit-journal" required></select>
+                </label>
+                <label>Title
+                    <input name="title" required minlength="10" maxlength="300">
+                </label>
+                <label>Abstract <small>(50–5000 characters)</small>
+                    <textarea name="abstract" rows="7" required minlength="50" maxlength="5000"></textarea>
+                </label>
+                <label>Keywords <small>(comma separated)</small>
+                    <input name="keywords" maxlength="300">
+                </label>
+                <button class="btn primary" type="submit">Submit manuscript</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Reviewer assignments -->
+    <section id="view-reviews" class="view hidden">
+        <div class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Manuscript</th>
+                    <th>Round</th>
+                    <th>Assigned</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody id="review-rows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Editor dashboard -->
+    <section id="view-dashboard" class="view hidden">
+        <div class="stat-tiles" id="stat-tiles"></div>
+        <div class="card">
+            <h2>Journals</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Journal</th>
+                    <th class="num">Submissions</th>
+                    <th class="num">In progress</th>
+                    <th class="num">Accepted</th>
+                    <th class="num">Rejected</th>
+                    <th class="num">Acceptance rate</th>
+                    <th class="num">Avg. days to decision</th>
+                </tr>
+                </thead>
+                <tbody id="journal-stats"></tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Reviewer workload</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Reviewer</th>
+                    <th class="num">Assigned</th>
+                    <th class="num">Completed</th>
+                    <th class="num">Pending</th>
+                    <th class="num">Overdue</th>
+                    <th class="num">Submitted late</th>
+                    <th class="num">Avg. turnaround (days)</th>
+                </tr>
+                </thead>
+                <tbody id="reviewer-stats"></tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Overdue reviews</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Manuscript</th>
+                    <th>Journal</th>
+                    <th>Reviewer</th>
+                    <th>Due</th>
+                    <th class="num">Days overdue</th>
+                    <th>Reminder</th>
+                </tr>
+                </thead>
+                <tbody id="overdue-rows"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- Manuscript detail drawer -->
+<div class="overlay hidden" id="overlay"></div>
+<aside class="drawer hidden" id="drawer" aria-label="Manuscript details">
+    <button class="close" id="drawer-close" aria-label="Close">×</button>
+    <div id="drawer-body"></div>
+</aside>
+
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
